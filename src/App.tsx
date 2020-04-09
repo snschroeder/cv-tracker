@@ -3,13 +3,6 @@ import { Bar, Line } from 'react-chartjs-2';
 import './App.css';
 
 function App() {
-
-  // let raw = `2020-02-25 14(=)	
-  // 2020-02-26		15(+7.1%)	
-  // 2020-02-27		15(=)	
-  // 2020-02-28		19(+27%)	
-  // 2020-02-29		24(+26%)	1(n.a.)`
-
   let raw = `2020-02-26		15(+7.1%)	0
     2020-02-27		15(=)	0
     2020-02-28		19(+27%)	0
@@ -51,54 +44,52 @@ function App() {
     2020-04-04	​​​	307,876(+12%)	8,359(+19%)
     2020-04-05	​​​	333,593(+8.4%)	9,534(+14%)
     2020-04-06	​​​	362,955(+8.8%)	10,748(+13%)
-    2020-04-07	​​​	393,602(+8.4%)	12,675(+18%)`
+    2020-04-07	​​​	393,602(+8.4%)	12,675(+18%)
+    2020-04-08	​​​	425,746(+8%)	14,610(+15%)`
 
 
-  raw = raw.replace(/\t/g, '');
-  raw = raw.replace(/ *\([^)]*\) */g, ' ');
-  const rawArr = raw.split(/\s+/g);
-  const cleanArr = [];
+  let newRaw = raw.replace(/[^\x00-\x7F]/g, "");
+  newRaw = newRaw.replace(/ *\([^)]*\) */g, ' ');
+  newRaw = newRaw.replace(/\t/g, ' ');
+  newRaw = newRaw.replace(/,/g, '');
+  let arr = newRaw.split(/\s+/g);
+  arr = arr.filter(Boolean);
+
   const dateLabels = [];
-  let infectedData = [];
-  
+  const infectedData = [];
+  const mortData = [];
 
-  for (let i = 0; i < rawArr.length; i += 1) {
-    if (rawArr[i][4] === '-') {
-      const date = rawArr[i].slice(0, 10);
-      const infected = rawArr[i].slice(10);
-      dateLabels.push(date);
-      infectedData.push(infected);
-    } else {
-      cleanArr.push(rawArr[i]);
-    }
+  for (let i = 0; i < arr.length; i += 3) {
+    dateLabels.push(arr[i]);
+    infectedData.push(arr[i + 1]);
+    mortData.push(arr[i + 2]);
   }
-  console.log(dateLabels)
-  console.log(infectedData);
-
-
-
-
-  infectedData = infectedData.map((val) => val.replace(/[^\x00-\x7F]/g, ""));
-
-  infectedData.forEach((val) => console.log(val));
-
-  infectedData = infectedData.map((val) => val.replace(/,/, ''));
-
-  infectedData = infectedData.map((val) => Number(val));
-  console.log(infectedData);
 
   const data = {
     labels: dateLabels,
     datasets:[{
-      label: 'dataset 1',
+      label: 'Confirmed Coronavirus cases in the U.S.',
       backgroundColor: 'rgb(255, 99, 132)',
       borderColor: 'rgb(255, 99, 132)',
       data: infectedData
-    }]
+    }
+    // {
+    //   label: 'Coronavirus mortality in the U.S.',
+    //   backgroundColor: 'rgb(0, 22, 100)',
+    //   borderColor: 'rgb(0, 22, 100)',
+    //   data: mortData
+    ]
+  }
+  const options = {
+    scales: {
+      yAxes: [{
+        type: 'logarithmic'
+      }]
+    }
   }
   return (
     <div className="App">
-      <Bar data={data} />
+      <Bar data={data} options={options} />
     </div>
   );
 }
