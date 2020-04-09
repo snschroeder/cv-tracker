@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bar, Line } from 'react-chartjs-2';
 import './App.css';
 
 function App() {
+  const [dateLabels, setDateLabels] = useState(['']);
+  const [infectedData, setInfectedData] = useState(['']);
+  const [mortData, setMortData] = useState(['']);
+
+  const dateHolder: string[] = [];
+  const infectedHolder: string[] = [];
+  const mortHolder: string[] = [];
+
   let raw = `2020-02-26		15(+7.1%)	0
     2020-02-27		15(=)	0
     2020-02-28		19(+27%)	0
@@ -47,23 +55,31 @@ function App() {
     2020-04-07	​​​	393,602(+8.4%)	12,675(+18%)
     2020-04-08	​​​	425,746(+8%)	14,610(+15%)`
 
+    const processRaw = (rawInput:string) : string[] => {
+      let newRaw: string = rawInput.replace(/[^\x00-\x7F]/g, "");
+      newRaw = newRaw.replace(/ *\([^)]*\) */g, ' ');
+      newRaw = newRaw.replace(/\t/g, ' ');
+      newRaw = newRaw.replace(/,/g, '');
+      let arr: string[] = newRaw.split(/\s+/g);
+      arr = arr.filter(Boolean);
+      return arr;
+    }
 
-  let newRaw = raw.replace(/[^\x00-\x7F]/g, "");
-  newRaw = newRaw.replace(/ *\([^)]*\) */g, ' ');
-  newRaw = newRaw.replace(/\t/g, ' ');
-  newRaw = newRaw.replace(/,/g, '');
-  let arr = newRaw.split(/\s+/g);
-  arr = arr.filter(Boolean);
+    const handleData = (inputArr: string[]) => {
+      for (let i = 0; i < inputArr.length; i += 3) {
+        dateHolder.push(inputArr[i]);
+        infectedHolder.push(inputArr[i + 1]);
+        mortHolder.push(inputArr[i + 2]);
+      }
+      
+      setDateLabels([...dateHolder]);
+      setInfectedData([...infectedHolder]);
+      setMortData([...mortHolder]);
+    }
 
-  const dateLabels = [];
-  const infectedData = [];
-  const mortData = [];
-
-  for (let i = 0; i < arr.length; i += 3) {
-    dateLabels.push(arr[i]);
-    infectedData.push(arr[i + 1]);
-    mortData.push(arr[i + 2]);
-  }
+  useEffect(() => {
+    handleData(processRaw(raw));
+  }, [])
 
   const data = {
     labels: dateLabels,
